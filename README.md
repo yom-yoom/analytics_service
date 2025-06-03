@@ -1,109 +1,41 @@
-# Service Template
+# 📦 Analytics Service
 
-Стандартный шаблон проекта на SpringBoot
+## 📄 Описание
 
-# Использованные технологии
+Микросервис отвечает за сбор и хранение аналитики по всем сервисам.
 
-* [Spring Boot](https://spring.io/projects/spring-boot) – как основной фрэймворк
-* [PostgreSQL](https://www.postgresql.org/) – как основная реляционная база данных
-* [Redis](https://redis.io/) – как кэш и очередь сообщений через pub/sub
-* [testcontainers](https://testcontainers.com/) – для изолированного тестирования с базой данных
-* [Liquibase](https://www.liquibase.org/) – для ведения миграций схемы БД
-* [Gradle](https://gradle.org/) – как система сборки приложения
-* [Lombok](https://projectlombok.org/) – для удобной работы с POJO классами
-* [MapStruct](https://mapstruct.org/) – для удобного маппинга между POJO классами
+## ⚙️ Технологии
 
-# База данных
+### Основа:
 
-* База поднимается в отдельном сервисе [infra](../infra)
-* Redis поднимается в единственном инстансе тоже в [infra](../infra)
-* Liquibase сам накатывает нужные миграции на голый PostgreSql при старте приложения
-* В тестах используется [testcontainers](https://testcontainers.com/), в котором тоже запускается отдельный инстанс
-  postgres
-* В коде продемонстрирована работа как с JdbcTemplate, так и с JPA (Hibernate)
+- Java 17
+- Spring Boot 3.0.6
 
-# Как начать разработку начиная с шаблона?
+### Базы:
 
-1. Сначала нужно склонировать этот репозиторий
+- PostgreSQL
+- Redis
+- Liquibase
 
-```shell
-git clone https://github.com/FAANG-School/ServiceTemplate
-```
+### Общение микросервисов:
 
-2. Далее удаляем служебную директорию для git
+- Kafka
+- OpenFeign
 
-```shell
-# Переходим в корневую директорию проекта
-cd ServiceTemplate
-rm -rf .git
-```
+### Тестирование:
 
-3. Далее нужно создать совершенно пустой репозиторий в github/gitlab
+- JUnit 5
+- Mockito
+- AssertJ
+- Testcontainers
 
-4. Создаём новый репозиторий локально и коммитим изменения
+### Прочее:
 
-```shell
-git init
-git remote add origin <link_to_repo>
-git add .
-git commit -m "<msg>"
-```
-
-Готово, можно начинать работу!
-
-# Как запустить локально?
-
-Сначала нужно развернуть базу данных из директории [infra](../infra)
-
-Далее собрать gradle проект
-
-```shell
-# Нужно запустить из корневой директории, где лежит build.gradle.kts
-gradle build
-```
-
-Запустить jar'ник
-
-```shell
-java -jar build/libs/ServiceTemplate-1.0.jar
-```
-
-Но легче всё это делать через IDE
-
-# Код
-
-RESTful приложения калькулятор с единственным endpoint'ом, который принимает 2 числа и выдает результаты их сложения,
-вычитаяни, умножения и деления
-
-* Обычная трёхслойная
-  архитектура – [Controller](src/main/java/faang/school/analytics/controller), [Service](src/main/java/faang/school/analytics/service), [Repository](src/main/java/faang/school/analytics/repository)
-* Слой Repository реализован и на jdbcTemplate, и на JPA (Hibernate)
-* Написан [GlobalExceptionHandler](src/main/java/faang/school/analytics/controller/GlobalExceptionHandler.java)
-  который умеет возвращать ошибки в формате `{"code":"CODE", "message": "message"}`
-* Используется TTL кэширование вычислений
-  в [CalculationTtlCacheService](src/main/java/faang/school/analytics/service/cache/CalculationTtlCacheService.java)
-* Реализован простой Messaging через [Redis pub/sub](https://redis.io/docs/manual/pubsub/)
-  * [Конфигурация](src/main/java/faang/school/analytics/config/RedisConfig.java) –
-    сетапится [RedisTemplate](https://docs.spring.io/spring-data/redis/docs/current/api/org/springframework/data/redis/core/RedisTemplate.html) –
-    класс, для удобной работы с Redis силами Spring
-  * [Отправитель](src/main/java/faang/school/analytics/service/messaging/RedisCalculationPublisher.java) – генерит
-    рандомные запросы и отправляет в очередь
-  * [Получатель](src/main/java/faang/school/analytics/service/messaging/RedisCalculationSubscriber.java) –
-    получает запросы и отправляет задачи асинхронно выполняться
-    в [воркер](src/main/java/faang/school/analytics/service/worker/CalculationWorker.java)
-
-# Тесты
-
-Написаны только для единственного REST endpoint'а
-* SpringBootTest
-* MockMvc
-* Testcontainers
-* AssertJ
-* JUnit5
-* Parameterized tests
-
-# TODO
-
-* Dockerfile, который подключается к сети запущенной postgres в docker-compose
-* Redis connectivity
-* ...
+- Lombok
+- MapStruct
+- Springdoc OpenAPI
+- CI Pipeline (GitHub Actions)
+- JaCoCo
+- Slf4j
+- Docker
+- WebClient
